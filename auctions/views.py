@@ -1,15 +1,44 @@
+from django import forms
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from .models import *
+from .utils import *
 
-from .models import User
+class CreateForm (forms.Form):
+    title = forms.CharField(label="Title")
+    description = forms.CharField(label="")
+    placeholder = "Enter the description  ..."
+    description.widget = forms.Textarea(attrs={"placeholder": placeholder})
+    minBid = forms.FloatField(label="Initial Bid")
+    imgURL = forms.CharField(label="Img URL (Optional)", required=False)
+    category = forms.CharField(label="Add a Category (Optional)", required=False)
+    selectCategory = forms.ChoiceField
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html",{"listings": Listing.objects.all() })
 
+@login_required(login_url='login')
+def createListing(request):
+    if request.method == "POST":   
+        setListing(request)
+        return HttpResponseRedirect(reverse("index"))
+    else:
+        return render(request, "auctions/createListing.html", {"form": CreateForm()})
+
+def watchlist(request):
+    pass
+
+def categories(request):
+    pass
+
+def visitListing(request, id):
+    listing = Listing.objects.get(id = id)
+    return render(request,"auctions/viewListing.html", {"listing": listing, "comments": listing.listingComments.all()} )
 
 def login_view(request):
     if request.method == "POST":
