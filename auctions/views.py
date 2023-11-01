@@ -30,8 +30,9 @@ def createListing(request):
     else:
         return render(request, "auctions/createListing.html", {"form": CreateForm()})
 
-def watchlist(request):
-    pass
+def watchlist(request):       
+    userListings = Listing.objects.filter(watchlistedBy= request.user)
+    return render(request, "auctions/watchlist.html",{"listings": userListings})
 
 def categories(request):
     pass
