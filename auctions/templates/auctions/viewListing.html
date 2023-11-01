@@ -15,11 +15,12 @@
     {% endfor %}
     </div>            
     {% if user.is_authenticated %}
-        <button>Comment</button>
-        {% if user.id == listing.poster.id %}
-            <button>Delete Listing</button>
-            <button>Edit Listing</button>    
-            <button>Finalize</button>
+        <form action="" method="post">{% csrf_token %}<input type="submit" value="Comment"></form>    
+        <form action="/addWatchlist/{{listing.id}}" method="post">{% csrf_token %}<input type="submit" value="Watchlist"></form>   
+        {% if user.id == listing.poster.id %}                
+            <form action="" method="post">{% csrf_token %}<input type="submit" value="Delete"></form>    
+            <form action="" method="post">{% csrf_token %}<input type="submit" value="Edit"></form>     
+            <form action="" method="post">{% csrf_token %}<input type="submit" value="Fnalize"></form>     
         {% endif %}
     {% endif %}    
 {% endblock %}

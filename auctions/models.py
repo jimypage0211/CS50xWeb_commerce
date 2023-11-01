@@ -7,10 +7,10 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=20)
+    catName = models.CharField(max_length=20)
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.catName}"
 
 
 class Listing(models.Model):

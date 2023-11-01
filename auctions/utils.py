@@ -5,7 +5,7 @@ def setListing(request):
     description = request.POST["description"]
     minBid = request.POST["minBid"]
     imgURL = request.POST["imgURL"]
-    category = request.POST["category"]
+    category = Category(name = request.POST["category"])    
     user = request.user
     listing = Listing(
         poster = user,
@@ -14,15 +14,10 @@ def setListing(request):
         initialPrice = minBid,
         active = True,
         imgLink = imgURL,
-        category = None
+        category = category
         )
-    listing.save()
-    
-def setCategory(request):
-    pass
+    listing.save()   
 
-def getCategory():
-    pass
 
 def setComment(request):
     pass
