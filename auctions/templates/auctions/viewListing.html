@@ -11,16 +11,18 @@
     <br> 
     <h1>Comments:</h1>
     {% for comment in comments %}
-    <h2>{{comment.message}}</h2>
+    <h2>{{comment.author}} commented:</h2>
+    <div>{{comment.message}}</div>
     {% endfor %}
     </div>            
     {% if user.is_authenticated %}
-        <form action="" method="post">{% csrf_token %}<input type="submit" value="Comment"></form>    
+        <form action="" method="post">{% csrf_token %}<input type="submit" value="Bid"></form>    
+        <form action="/createComment/{{listing.id}}">{% csrf_token %}<input type="submit" value="Comment"></form>    
         <form action="/addWatchlist/{{listing.id}}" method="post">{% csrf_token %}<input type="submit" value="Watchlist"></form>   
         {% if user.id == listing.poster.id %}                
             <form action="" method="post">{% csrf_token %}<input type="submit" value="Delete"></form>    
             <form action="" method="post">{% csrf_token %}<input type="submit" value="Edit"></form>     
-            <form action="" method="post">{% csrf_token %}<input type="submit" value="Fnalize"></form>     
+            <form action="" method="post">{% csrf_token %}<input type="submit" value="Finalize"></form>     
         {% endif %}
     {% endif %}    
 {% endblock %}

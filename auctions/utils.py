@@ -19,15 +19,20 @@ def setListing(request):
     listing.save()   
 
 
-def setComment(request):
-    pass
-
-def getComment():
-    pass
+def setComment(request,listingID):
+    commentTitle = request.POST["commentTitle"]
+    message = request.POST["message"]
+    user = request.user
+    target = Listing.objects.get(id=listingID)
+    comment = Comment(
+        commentTitle= commentTitle,
+        message= message,
+        author= user,
+        target= target
+    )
+    comment.save()
 
 def setBid(request):
     pass
 
-def getBid():
-    pass
 

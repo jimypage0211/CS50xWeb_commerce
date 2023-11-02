@@ -7,7 +7,6 @@
     {% else %}
         <h1>Active Listings</h1>
     {% endif %}
-    <h2>{{listings}}</h2>
     {% for listing in listings %}
     <div>
         <h1>{{listing.title}} by {{listing.poster}}</h1>

@@ -11,7 +11,7 @@ from .models import *
 from .utils import *
 
 
-class CreateForm(forms.Form):
+class ListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(label="")
     placeholder = "Enter the description  ..."
@@ -21,10 +21,24 @@ class CreateForm(forms.Form):
     category = forms.CharField(label="Add a Category (Optional)", required=False)
     selectCategory = forms.ChoiceField
 
+class CommentForm(forms.Form):
+    commentTitle = forms.CharField(label="Comment Title")
+    message = forms.CharField(label="")
+    placeholder = "Enter comment message  ..."
+    message.widget = forms.Textarea(attrs={"placeholder": placeholder})
+
 
 def index(request):
     return render(request, "auctions/index.html", {"listings": Listing.objects.all(), "catName": ""})
 
+
+
+def createComment (request, listingId):
+    if request.method == "POST":
+        setComment(request, listingId)
+        return HttpResponseRedirect(reverse("visit", kwargs={"id": listingId}))
+    else:        
+        return render(request, "auctions/createComment.html", {"form": CommentForm()})  
 
 @login_required(login_url="login")
 def createListing(request):
@@ -32,7 +46,7 @@ def createListing(request):
         setListing(request)
         return HttpResponseRedirect(reverse("index"))
     else:
-        return render(request, "auctions/createListing.html", {"form": CreateForm()})
+        return render(request, "auctions/createListing.html", {"form": ListingForm()})
 
 
 def watchlist(request):
