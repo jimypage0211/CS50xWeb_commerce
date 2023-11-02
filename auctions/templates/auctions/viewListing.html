@@ -1,28 +1,51 @@
-{% extends "auctions/layout.html" %}
+{% extends "auctions/layout.html" %} 
 
 {% block body %}
     <h2>{{listing.title}}</h2>
-    <h1>By {{listing.poster}}</h1>
+    <h1>By <span style="color: red;">{{listing.poster}}</span></h1>
     <h2>{{listing.description}}</h2>
     <h2>{{listing.initialPrice}}</h2>
-    {% if  listing.imgLink %}
-        <img src="{{listing.imgLink}}" style = "height: 100px; width: 100px">
-    {% endif %}   
-    <br> 
+    {% if listing.imgLink %}
+        <img src="{{listing.imgLink}}" style="height: 100px; width: 100px" />
+    {% endif %}
+    <br />
     <h1>Comments:</h1>
     {% for comment in comments %}
-    <h2>{{comment.author}} commented:</h2>
-    <div>{{comment.message}}</div>
-    {% endfor %}
-    </div>            
-    {% if user.is_authenticated %}
-        <form action="" method="post">{% csrf_token %}<input type="submit" value="Bid"></form>    
-        <form action="/createComment/{{listing.id}}">{% csrf_token %}<input type="submit" value="Comment"></form>    
-        <form action="/addWatchlist/{{listing.id}}" method="post">{% csrf_token %}<input type="submit" value="Watchlist"></form>   
-        {% if user.id == listing.poster.id %}                
-            <form action="" method="post">{% csrf_token %}<input type="submit" value="Delete"></form>    
-            <form action="" method="post">{% csrf_token %}<input type="submit" value="Edit"></form>     
-            <form action="" method="post">{% csrf_token %}<input type="submit" value="Finalize"></form>     
-        {% endif %}
-    {% endif %}    
+        <h2>{{comment.author}} commented:</h2>
+        <div>{{comment.message}}</div>
+    {% endfor %} 
+    {% if user.is_authenticated %}   
+        {% if user.id == listing.poster.id %}
+            <div>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Delete" />
+                </form>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Edit" />
+                </form>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Finalize" />
+                </form>
+            </div>
+        {% else %}
+            <div>
+                <form action="/bid/{{listing.id}}" method="post">
+                    {% csrf_token %}
+                    <input type="number" name= "bidValue">
+                    <input type="submit" value="Bid" />
+                </form>
+                <form action="/createComment/{{listing.id}}">
+                    {% csrf_token %}
+                    <input type="submit" value="Comment" />
+                </form>
+                <form action="/addWatchlist/{{listing.id}}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Watchlist" />
+                </form>
+            </div>
+        {% endif %} 
+    {% endif %} 
 {% endblock %}

@@ -31,7 +31,15 @@ class CommentForm(forms.Form):
 def index(request):
     return render(request, "auctions/index.html", {"listings": Listing.objects.all(), "catName": ""})
 
-
+def bid(request, listingId):
+    target = Listing.objects.get(id = listingId)
+    bid = Bid(
+        bidder= request.user,
+        target= target,
+        bidValue= request.POST["bidValue"]
+    )
+    bid.save()
+    return  HttpResponseRedirect(reverse("visit", kwargs={"id": listingId}))
 
 def createComment (request, listingId):
     if request.method == "POST":

@@ -46,7 +46,7 @@ class Bid(models.Model):
         Listing, on_delete=models.CASCADE, related_name="listingBids"
     )
     bidValue = models.FloatField()
-    active = models.BooleanField()
+    
 
     def __str__(self) -> str:
         return f"Bidder: {self.bidder}, Listing: {self.target}, Offer: {self.bidValue}"
