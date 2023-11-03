@@ -5,13 +5,15 @@ def setListing(request):
     description = request.POST["description"]
     minBid = request.POST["minBid"]
     imgURL = request.POST["imgURL"]
-    category = Category(name = request.POST["category"])    
+    category = Category(catName = request.POST["category"])
+    category.save()    
     user = request.user
     listing = Listing(
         poster = user,
         title = title,
         description = description,
         initialPrice = minBid,
+        winningBid = minBid,
         active = True,
         imgLink = imgURL,
         category = category
@@ -32,7 +34,16 @@ def setComment(request,listingID):
     )
     comment.save()
 
-def setBid(request):
-    pass
+def getHighestBid(listing):
+    bids = listing.listingBids.all()
+    max = 0
+    if not len(bids):
+        return "No bids"
+    else:
+        for bid in bids:
+            if bid.bidValue > max:
+                max = bid.bidValue
+        return max
+    
 
 

@@ -21,6 +21,7 @@ class Listing(models.Model):
     active = models.BooleanField()
     imgLink = models.CharField(max_length=100, blank=True)
     category = models.ForeignKey(Category,on_delete=models.CASCADE,blank=True, null=True, related_name="listings")
+    winningBid = models.FloatField(null=False)
     watchlistedBy = models.ManyToManyField(User, null=True, blank=True, related_name="watchlist")
 
     def __str__(self) -> str:

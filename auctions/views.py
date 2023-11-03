@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+
 
 from .models import *
 from .utils import *
@@ -29,10 +29,24 @@ class CommentForm(forms.Form):
 
 
 def index(request):
-    return render(request, "auctions/index.html", {"listings": Listing.objects.all(), "catName": ""})
+    activeListings = Listing.objects.filter(active = True)
+    return render(request, "auctions/index.html", {"listings": activeListings, "catName": ""})
+
+def finalize (request, listingId):
+    toCloseListing = Listing.objects.get(id=listingId)
+    toCloseListing.active= False
+    toCloseListing.save()
+    return HttpResponseRedirect(reverse("index"))
+    
 
 def bid(request, listingId):
     target = Listing.objects.get(id = listingId)
+    highestBid = getHighestBid(target)
+    if highestBid != "No bids" :
+        target.winningBid = getHighestBid(target)    
+    bidValue = float (request.POST["bidValue"])   
+    if bidValue <= target.winningBid:
+        return HttpResponse("Bid needs to be higher than winning bid")
     bid = Bid(
         bidder= request.user,
         target= target,
@@ -86,6 +100,8 @@ def categoryListings(request, catName):
 
 def visitListing(request, id):
     listing = Listing.objects.get(id=id)
+    highestBid = getHighestBid(listing)
+    listing.winningBid = highestBid
     return render(
         request,
         "auctions/viewListing.html",

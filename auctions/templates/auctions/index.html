@@ -8,14 +8,16 @@
         <h1>Active Listings</h1>
     {% endif %}
     {% for listing in listings %}
-    <div>
-        <h1>{{listing.title}} by <span style="color: red">{{listing.poster}}</span></h1>
-        <h2>{{listing.description}}</h2>
-        <h2>{{listing.initialPrice}}</h2>
-        {% if  listing.imgLink %}
-            <img src="{{listing.imgLink}}" style = "height: 100px; width: 100px">
-        {% endif %}    
-        <a href="/listing/{{listing.id}}">View listing</a>    
-    </div>        
+        {% if listing.active %}
+            <div>
+                <h1>{{listing.title}} by <span style="color: red">{{listing.poster}}</span></h1>
+                <h2>{{listing.description}}</h2>
+                <h2>{{listing.initialPrice}}</h2>
+                {% if  listing.imgLink %}
+                    <img src="{{listing.imgLink}}" style = "height: 100px; width: 100px">
+                {% endif %}    
+                <a href="/listing/{{listing.id}}">View listing</a>    
+            </div>  
+        {% endif %}              
     {% endfor %}
 {% endblock %}
