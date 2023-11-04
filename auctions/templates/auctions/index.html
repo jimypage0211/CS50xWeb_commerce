@@ -3,21 +3,27 @@
 {% block body %}
     
     {% if catName %}
-        <h1>{{catName}}</h1>
+        <h1>Category: {{catName}}</h1>
     {% else %}
         <h1>Active Listings</h1>
     {% endif %}
-    {% for listing in listings %}
-        {% if listing.active %}
-            <div>
-                <h1>{{listing.title}} by <span style="color: red">{{listing.poster}}</span></h1>
-                <h2>{{listing.description}}</h2>
-                <h2>{{listing.initialPrice}}</h2>
-                {% if  listing.imgLink %}
-                    <img src="{{listing.imgLink}}" style = "height: 100px; width: 100px">
-                {% endif %}    
-                <a href="/listing/{{listing.id}}">View listing</a>    
-            </div>  
-        {% endif %}              
-    {% endfor %}
+    <div class="row">
+        {% for listing in listings %}
+            {% if listing.active %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    {% if  listing.imgLink %}
+                        <img class="card-img-top" src="{{listing.imgLink}}">
+                    {% endif %} 
+                    <div class="card-body">
+                        <h3 class="card-title">{{listing.title}} by <span style="color: red">{{listing.poster}}</span></h3>
+                        <p class="card-text">{{listing.description}}</p>
+                        <h4>${{listing.winningBid}}</h4>                   
+                        <a href="/listing/{{listing.id}}/noAlert" class = "btn btn-primary">View listing</a>    
+                    </div>
+                </div> 
+            </div> 
+            {% endif %}              
+        {% endfor %}
+    </div>
 {% endblock %}

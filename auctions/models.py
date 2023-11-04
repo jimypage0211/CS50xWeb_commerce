@@ -19,7 +19,7 @@ class Listing(models.Model):
     description = models.TextField()
     initialPrice = models.FloatField()
     active = models.BooleanField()
-    imgLink = models.CharField(max_length=100, blank=True)
+    imgLink = models.CharField(max_length=200, blank=True)
     category = models.ForeignKey(Category,on_delete=models.CASCADE,blank=True, null=True, related_name="listings")
     winningBid = models.FloatField(null=False)
     watchlistedBy = models.ManyToManyField(User, null=True, blank=True, related_name="watchlist")

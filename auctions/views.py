@@ -32,6 +32,12 @@ def index(request):
     activeListings = Listing.objects.filter(active = True)
     return render(request, "auctions/index.html", {"listings": activeListings, "catName": ""})
 
+def delete(request, listingId):
+    toDelete = Listing.objects.get(id=listingId)
+    toDelete.delete()
+    return HttpResponseRedirect(reverse("index"))
+
+
 def finalize (request, listingId):
     toCloseListing = Listing.objects.get(id=listingId)
     toCloseListing.active= False
@@ -43,17 +49,20 @@ def bid(request, listingId):
     target = Listing.objects.get(id = listingId)
     highestBid = getHighestBid(target)
     if highestBid != "No bids" :
-        target.winningBid = getHighestBid(target)    
+        target.winningBid = highestBid.bidValue 
+        target.save()
     bidValue = float (request.POST["bidValue"])   
     if bidValue <= target.winningBid:
-        return HttpResponse("Bid needs to be higher than winning bid")
+        return  HttpResponseRedirect(reverse("visit", kwargs={"id": listingId, "alert": "badBid"}))
     bid = Bid(
         bidder= request.user,
         target= target,
         bidValue= request.POST["bidValue"]
     )
     bid.save()
-    return  HttpResponseRedirect(reverse("visit", kwargs={"id": listingId}))
+    #every bided listing goes into WL
+    target.watchlistedBy.add(request.user)
+    return  HttpResponseRedirect(reverse("visit", kwargs={"id": listingId, "alert": "okBid"}))
 
 def createComment (request, listingId):
     if request.method == "POST":
@@ -77,11 +86,11 @@ def watchlist(request):
 
 
 def addWatchlist(request, id):
-    wl = Listing.objects.get(id=id)
-    if wl.watchlistedBy.contains(request.user):
-        return HttpResponse("Already in wl TODO")
+    toWatch = Listing.objects.get(id=id)
+    if toWatch.watchlistedBy.contains(request.user):
+        return HttpResponse("Already in WL TODO")
     else:
-        wl.watchlistedBy.add(request.user)
+        toWatch.watchlistedBy.add(request.user)
         return HttpResponseRedirect(reverse("watchlist"))
 
 
@@ -98,14 +107,18 @@ def categoryListings(request, catName):
     )
 
 
-def visitListing(request, id):
+def visitListing(request, id, alert):
     listing = Listing.objects.get(id=id)
     highestBid = getHighestBid(listing)
-    listing.winningBid = highestBid
+    if highestBid == "No bids":
+        listing.winningBid = listing.initialPrice
+    else:
+        listing.winningBid = highestBid.bidValue
+    listing.save()
     return render(
         request,
         "auctions/viewListing.html",
-        {"listing": listing, "comments": listing.listingComments.all()},
+        {"listing": listing, "comments": listing.listingComments.all(), "winningBid": highestBid, "alert":alert},
     )
 
 

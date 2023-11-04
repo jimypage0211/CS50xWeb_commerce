@@ -1,12 +1,22 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    {% for listing in listings %}
-        <div>
-            <h2>{{listing.title}}</h2>
-            <h1>By {{listing.poster}}</h1>
-            <h2>{{listing.description}}</h2>
-            <h2>{{listing.initialPrice}}</h2>
-        </div>
-    {% endfor %}
+    <h1>Watchlist</h1>
+    <div class="row">
+        {% for listing in listings %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    {% if listing.imgLink %}
+                        <img class="card-img-top" src="{{listing.imgLink}}"/>
+                    {% endif %}
+                    <div class="card-body">
+                        <h3 class="card-title">{{listing.title}} by <span style="color: red">{{listing.poster}}</span></h3>
+                        <p class="card-text">{{listing.description}}</p>
+                        <h4>${{listing.winningBid}}</h4>                   
+                        <a href="/listing/{{listing.id}}/noAlert" class = "btn btn-primary">View listing</a>  
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>   
 {% endblock  %}

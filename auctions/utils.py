@@ -36,14 +36,16 @@ def setComment(request,listingID):
 
 def getHighestBid(listing):
     bids = listing.listingBids.all()
-    max = 0
-    if not len(bids):
-        return "No bids"
+    if len(bids) == 0:
+        return "No bids"       
     else:
+        maxValue = 0
+        maxBid = bids[0] 
         for bid in bids:
-            if bid.bidValue > max:
-                max = bid.bidValue
-        return max
+            if bid.bidValue > maxValue:
+                maxValue = bid.bidValue
+                maxBid = bid
+        return maxBid
     
 
 

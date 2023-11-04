@@ -1,15 +1,28 @@
 {% extends "auctions/layout.html" %} 
 
 {% block body %}
+    
+    {% if alert == "badBid"  %}
+        <div class="alert alert-danger" role="alert">
+            Bids must be higher than current/initial bid :(
+        </div>
+    {% elif alert == "okBid" %}
+        <div class="alert alert-success" role="alert">
+            Your bid was placed!
+        </div>
+    {% endif %}
     {% if listing.active %}
-        <h2>Title: {{listing.title}}</h2>
-        <h1>By <span style="color: red;">{{listing.poster}}</span></h1>
-        <h2>Description: {{listing.description}}</h2>
-        <h2>Initial Price: {{listing.initialPrice}}</h2>
-        <h2>Winning bid: {{listing.winningBid}}</h2>
-        {% if listing.imgLink %}
-            <img src="{{listing.imgLink}}" style="height: 100px; width: 100px" />
-        {% endif %}
+        <div>
+            {% if listing.imgLink %}
+                <img src="{{listing.imgLink}}" style="height: 100px; width: 100px" />
+            {% endif %}
+            <h1>Title: {{listing.title}}</h2>
+            <h2>By <span style="color: red;">{{listing.poster}}</span></h2>
+            <h2>Description: {{listing.description}}</h2>
+            <h2>Initial Price: {{listing.initialPrice}}</h2>
+            <h2>Winning bid: {{listing.winningBid}}</h2>
+        </div>
+        
         <br />
         <h1>Comments:</h1>
         {% for comment in comments %}
@@ -19,13 +32,9 @@
         {% if user.is_authenticated %}   
             {% if user.id == listing.poster.id %}
                 <div>
-                    <form action="" method="post">
+                    <form action="/delete/{{listing.id}}">
                         {% csrf_token %}
                         <input type="submit" value="Delete" />
-                    </form>
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <input type="submit" value="Edit" />
                     </form>
                     <form action="/finalize/{{listing.id}}" method="post">
                         {% csrf_token %}
@@ -50,6 +59,10 @@
                 </div>
             {% endif %} 
         {% endif %} 
+    {% elif user.id == winningBid.bidder.id %}
+        <div class="alert alert-success" role="alert">
+            <h1>You won this listing for {{listing.winningBid}}$</h1>
+        </div>
     {% endif %}
     
     
