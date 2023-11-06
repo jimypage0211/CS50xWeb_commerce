@@ -31,7 +31,6 @@ class Comment(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="userComments"
     )   
-    commentTitle = models.CharField(max_length=255) 
     message = models.TextField()
     target = models.ForeignKey(
         Listing, on_delete=models.CASCADE, related_name="listingComments"

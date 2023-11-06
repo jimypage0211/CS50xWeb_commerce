@@ -10,19 +10,17 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from .utils import *
 
-
+#Form for creating a Listing 
 class ListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(label="")
     placeholder = "Enter the description  ..."
     description.widget = forms.Textarea(attrs={"placeholder": placeholder})
     minBid = forms.FloatField(label="Initial Bid")
-    imgURL = forms.CharField(label="Img URL (Optional)", required=False)
-    category = forms.CharField(label="Add a Category (Optional)", required=False)
-    selectCategory = forms.ChoiceField
+    imgURL = forms.CharField(label="Img URL (Optional)", required=False) 
+    category = forms.CharField(label="Category (Optional)", required=False)    
 
-class CommentForm(forms.Form):
-    commentTitle = forms.CharField(label="Comment Title")
+class CommentForm(forms.Form):    
     message = forms.CharField(label="")
     placeholder = "Enter comment message  ..."
     message.widget = forms.Textarea(attrs={"placeholder": placeholder})
@@ -67,7 +65,7 @@ def bid(request, listingId):
 def createComment (request, listingId):
     if request.method == "POST":
         setComment(request, listingId)
-        return HttpResponseRedirect(reverse("visit", kwargs={"id": listingId}))
+        return HttpResponseRedirect(reverse("visit", kwargs={"id": listingId, "alert": "okComment"}))
     else:        
         return render(request, "auctions/createComment.html", {"form": CommentForm()})  
 
@@ -91,7 +89,12 @@ def addWatchlist(request, id):
         return HttpResponse("Already in WL TODO")
     else:
         toWatch.watchlistedBy.add(request.user)
-        return HttpResponseRedirect(reverse("watchlist"))
+        return  HttpResponseRedirect(reverse("visit", kwargs={"id": id, "alert": "okWatchlist"}))
+
+def removeWatchlist(request, id):    
+    toRemove = Listing.objects.get(id=id)
+    toRemove.watchlistedBy.remove(request.user)
+    return  HttpResponseRedirect(reverse("visit", kwargs={"id": id, "alert": "badWatchlist"}))
 
 
 def categories(request):
@@ -110,6 +113,10 @@ def categoryListings(request, catName):
 def visitListing(request, id, alert):
     listing = Listing.objects.get(id=id)
     highestBid = getHighestBid(listing)
+    activeUserWL = request.user.watchlist.all()
+    wlListingsIDs = []
+    for wlListing in activeUserWL:
+        wlListingsIDs.append(wlListing.id)
     if highestBid == "No bids":
         listing.winningBid = listing.initialPrice
     else:
@@ -118,7 +125,10 @@ def visitListing(request, id, alert):
     return render(
         request,
         "auctions/viewListing.html",
-        {"listing": listing, "comments": listing.listingComments.all(), "winningBid": highestBid, "alert":alert},
+        {"listing": listing,
+        "comments": listing.listingComments.all(),
+        "winningBid": highestBid, "alert":alert,
+        "wlListingsIDs": wlListingsIDs},
     )
 
 

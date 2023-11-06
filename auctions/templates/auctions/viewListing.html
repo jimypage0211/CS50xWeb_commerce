@@ -1,44 +1,55 @@
 {% extends "auctions/layout.html" %} 
 
 {% block body %}
-    
+        
     {% if alert == "badBid"  %}
         <div class="alert alert-danger" role="alert">
-            Bids must be higher than current/initial bid :(
+            Bids must be higher than winning/initial bid :(
         </div>
     {% elif alert == "okBid" %}
         <div class="alert alert-success" role="alert">
             Your bid was placed!
         </div>
+    {% elif alert == "okComment" %}
+        <div class="alert alert-success" role="alert">
+            You commented on this listing!
+        </div>
+    {% elif alert == "okWatchlist" %}
+        <div class="alert alert-success" role="alert">
+            This listing was added to your watchlist
+        </div>    
+    {% elif alert == "badWatchlist" %}
+        <div class="alert alert-danger" role="alert">
+            This listing was removed to your watchlist
+        </div>
     {% endif %}
     {% if listing.active %}
         <div>
             {% if listing.imgLink %}
-                <img src="{{listing.imgLink}}" style="height: 100px; width: 100px" />
+                <img src="{{listing.imgLink}}" height= "300px" width="auto" />
             {% endif %}
-            <h1>Title: {{listing.title}}</h2>
-            <h2>By <span style="color: red;">{{listing.poster}}</span></h2>
-            <h2>Description: {{listing.description}}</h2>
-            <h2>Initial Price: {{listing.initialPrice}}</h2>
-            <h2>Winning bid: {{listing.winningBid}}</h2>
-        </div>
-        
+            <h3>Title: {{listing.title}} </h3>
+            <h4>Seller: <span style="color: red;"> {{listing.poster}}</span></h4>
+            <p>Description: {{listing.description}}</p>
+            <h5>Initial Price: ${{listing.initialPrice}}</h5>
+            <h5>Winning bid: ${{listing.winningBid}}</h5>
+        </div>        
         <br />
-        <h1>Comments:</h1>
+        <h4>Comments:</h4>
         {% for comment in comments %}
-            <h2>{{comment.author}} commented:</h2>
-            <div>{{comment.message}}</div>
+            <h5>{{comment.author}} commented:</h5>
+            <p>{{comment.message}}</p>
         {% endfor %} 
         {% if user.is_authenticated %}   
             {% if user.id == listing.poster.id %}
                 <div>
                     <form action="/delete/{{listing.id}}">
                         {% csrf_token %}
-                        <input type="submit" value="Delete" />
+                        <button class="btn btn-danger" type="submit">Delete</button>
                     </form>
                     <form action="/finalize/{{listing.id}}" method="post">
                         {% csrf_token %}
-                        <input type="submit" value="Finalize" />
+                        <button class="btn btn-primary" type="submit">Finalize</button>
                     </form>
                 </div>
             {% else %}
@@ -50,12 +61,20 @@
                     </form>
                     <form action="/createComment/{{listing.id}}">
                         {% csrf_token %}
-                        <input type="submit" value="Comment" />
+                        <button class="btn btn-primary" type="submit">Comment</button>
                     </form>
-                    <form action="/addWatchlist/{{listing.id}}" method="post">
-                        {% csrf_token %}
-                        <input type="submit" value="Watchlist" />
-                    </form>
+                    {% if listing.id in wlListingsIDs %}
+                        <form action="/removeWatchlist/{{listing.id}}" method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-danger" type="submit">RemoveWL</button>
+                        </form>
+                    {% else %}
+                        <form action="/addWatchlist/{{listing.id}}" method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-warning" type="submit">Watchlist</button>
+                        </form>
+                    {% endif %}
+                    
                 </div>
             {% endif %} 
         {% endif %} 

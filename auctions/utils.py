@@ -5,8 +5,12 @@ def setListing(request):
     description = request.POST["description"]
     minBid = request.POST["minBid"]
     imgURL = request.POST["imgURL"]
-    category = Category(catName = request.POST["category"])
-    category.save()    
+    categoryName = request.POST["category"]
+    try:
+        category = Category.objects.get(catName = categoryName)
+    except Category.DoesNotExist:
+        category = Category(catName = categoryName)
+        category.save()
     user = request.user
     listing = Listing(
         poster = user,
@@ -21,13 +25,11 @@ def setListing(request):
     listing.save()   
 
 
-def setComment(request,listingID):
-    commentTitle = request.POST["commentTitle"]
+def setComment(request,listingID):    
     message = request.POST["message"]
     user = request.user
     target = Listing.objects.get(id=listingID)
-    comment = Comment(
-        commentTitle= commentTitle,
+    comment = Comment(        
         message= message,
         author= user,
         target= target
