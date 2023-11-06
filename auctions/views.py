@@ -20,6 +20,7 @@ class ListingForm(forms.Form):
     imgURL = forms.CharField(label="Img URL (Optional)", required=False) 
     category = forms.CharField(label="Category (Optional)", required=False)    
 
+#Form For creating a Comment
 class CommentForm(forms.Form):    
     message = forms.CharField(label="")
     placeholder = "Enter comment message  ..."
@@ -27,16 +28,28 @@ class CommentForm(forms.Form):
 
 
 def index(request):
+    """ 
+    Renders all active listings. Category name (catName) is passed empty since this template is also 
+    used for showing all listing from an specific category. 
+    """
     activeListings = Listing.objects.filter(active = True)
     return render(request, "auctions/index.html", {"listings": activeListings, "catName": ""})
 
+
 def delete(request, listingId):
+    """ 
+    Given a the current listing id deletes a listing. After deletion it redirects to the index page. 
+    """
     toDelete = Listing.objects.get(id=listingId)
     toDelete.delete()
     return HttpResponseRedirect(reverse("index"))
 
 
 def finalize (request, listingId):
+    """ 
+    Closes a listing. After the listing is closed it wont be showed when listing the listings.
+    It redirects to the index page
+    """
     toCloseListing = Listing.objects.get(id=listingId)
     toCloseListing.active= False
     toCloseListing.save()
@@ -44,14 +57,24 @@ def finalize (request, listingId):
     
 
 def bid(request, listingId):
+    """ 
+    Given the current listing id, creates a new bid from the viewListing page. It also sets the 
+    highest bid for bidded listing. If the bid is less than     the winning bid, render the same
+    listing with an error message and the bid is not created, else, render a success message and
+    the bid is created and saved.
+    """
     target = Listing.objects.get(id = listingId)
     highestBid = getHighestBid(target)
     if highestBid != "No bids" :
+        #If there are bids set the listiing winning bid to the highest
         target.winningBid = highestBid.bidValue 
         target.save()
     bidValue = float (request.POST["bidValue"])   
     if bidValue <= target.winningBid:
+        #if bid < winningbid go to the listing page with a badBid alert
         return  HttpResponseRedirect(reverse("visit", kwargs={"id": listingId, "alert": "badBid"}))
+        
+    #Create the new bid
     bid = Bid(
         bidder= request.user,
         target= target,
@@ -62,7 +85,12 @@ def bid(request, listingId):
     target.watchlistedBy.add(request.user)
     return  HttpResponseRedirect(reverse("visit", kwargs={"id": listingId, "alert": "okBid"}))
 
+
 def createComment (request, listingId):
+    """
+    If the request is a POST, given the current listing id, creates a comment, else, renders the 
+    create comment form. 
+    """
     if request.method == "POST":
         setComment(request, listingId)
         return HttpResponseRedirect(reverse("visit", kwargs={"id": listingId, "alert": "okComment"}))
@@ -71,6 +99,10 @@ def createComment (request, listingId):
 
 @login_required(login_url="login")
 def createListing(request):
+    """
+    If the request is a POST, given the current listing id, creates a listing, else, renders the 
+    create listing form. 
+    """
     if request.method == "POST":
         setListing(request)
         return HttpResponseRedirect(reverse("index"))
@@ -79,31 +111,48 @@ def createListing(request):
 
 
 def watchlist(request):
+    """
+    Filters all listing watchlisted by the active user and renders them. 
+    """
     userListings = Listing.objects.filter(watchlistedBy=request.user)
     return render(request, "auctions/watchlist.html", {"listings": userListings})
 
 
 def addWatchlist(request, id):
+    """
+    Given the current listing Id add the listing to the active user WL, then , renders the listing 
+    page with a successful creation message. Now in the listing page it will appear a remove from WL 
+    button instead of an add to WL.
+    """
     toWatch = Listing.objects.get(id=id)
-    if toWatch.watchlistedBy.contains(request.user):
-        return HttpResponse("Already in WL TODO")
-    else:
-        toWatch.watchlistedBy.add(request.user)
-        return  HttpResponseRedirect(reverse("visit", kwargs={"id": id, "alert": "okWatchlist"}))
+    toWatch.watchlistedBy.add(request.user)
+    return  HttpResponseRedirect(reverse("visit", kwargs={"id": id, "alert": "okWatchlist"}))
+        
 
-def removeWatchlist(request, id):    
+def removeWatchlist(request, id):   
+    """
+    Given the current listing Id add the listing to the active user WL, then , renders the listing 
+    page with a succesful deletion message. Now in the listing page it will appear a add to WL button
+    instead of a remove from WL.
+    """ 
     toRemove = Listing.objects.get(id=id)
     toRemove.watchlistedBy.remove(request.user)
     return  HttpResponseRedirect(reverse("visit", kwargs={"id": id, "alert": "badWatchlist"}))
 
 
 def categories(request):
+    """
+    Render all categories buttons in the categories page. 
+    """
     return render(
         request, "auctions/categories.html", {"categories": Category.objects.all()}
     )
 
 
 def categoryListings(request, catName):
+    """
+    Render all listing from the clicked button category. 
+    """
     catListings = Category.objects.get(catName=catName)
     return render(
         request, "auctions/index.html", {"catName": catName, "listings": catListings.listings.all()}
@@ -111,12 +160,21 @@ def categoryListings(request, catName):
 
 
 def visitListing(request, id, alert):
-    listing = Listing.objects.get(id=id)
+    """
+    Given the listing ID and an alert type, renders the listing page for that listing. This page will 
+    alsor renders the success and failure messages from all redirections (bids, comments and WL). 
+    """
+    listing = Listing.objects.get(id=id)    
+    if request.user.is_authenticated:
+        #Creates a list of listing ids to check in page if the actual listing is in the WL of user
+        activeUserWL = request.user.watchlist.all()
+        wlListingsIDs = []
+        for wlListing in activeUserWL:
+            wlListingsIDs.append(wlListing.id)
+    else:
+        wlListingsIDs = []
+    #Needed to do this to update the winning bid when visiting the page    
     highestBid = getHighestBid(listing)
-    activeUserWL = request.user.watchlist.all()
-    wlListingsIDs = []
-    for wlListing in activeUserWL:
-        wlListingsIDs.append(wlListing.id)
     if highestBid == "No bids":
         listing.winningBid = listing.initialPrice
     else:

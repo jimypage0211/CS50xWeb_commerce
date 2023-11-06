@@ -54,7 +54,7 @@
                 </div>
             {% else %}
                 <div>
-                    <form action="/bid/{{listing.id}}" method="post">
+                    <form action="/bid/{{listing.id}}" method="post" style="margin: 5px 0px">
                         {% csrf_token %}
                         <input type="number" name= "bidValue">
                         <input type="submit" value="Bid" />
@@ -73,8 +73,7 @@
                             {% csrf_token %}
                             <button class="btn btn-warning" type="submit">Watchlist</button>
                         </form>
-                    {% endif %}
-                    
+                    {% endif %}                    
                 </div>
             {% endif %} 
         {% endif %} 
